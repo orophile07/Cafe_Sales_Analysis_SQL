@@ -1,0 +1,163 @@
+#To show all the values of the table.
+
+select * from c_sales;
+
+
+# 1. List all unique store locations.
+
+select distinct store_location from c_sales;
+
+
+# 2. Count total no. of transactions.
+
+select count(*) as total_transactions from c_sales;
+
+
+# 3. Find the total quantity sold.
+
+select sum(transaction_qty) as total_quantity_sold
+from c_sales;
+
+
+# 4. Find the earliest and latest transaction date of order.
+
+select min(transaction_date) earliest_date, max(transaction_date) latest_date 
+from c_sales;
+
+
+# 5. Count how many products were sold per category.
+
+select product_category, SUM(transaction_qty) AS total_quantity
+from c_sales
+group by product_category
+order by total_quantity desc;
+
+
+# 6. Find the total sales revenue (qty * unit_price) by store location.
+
+select store_location, 
+concat('$ ', format(round(sum(transaction_qty * unit_price),2),2)) as total_sales 
+from c_sales
+group by store_location
+order by total_sales desc;
+
+
+# 7. Top 5 Products by Revenue Generated
+
+select product_type, 
+concat('$ ', format(sum(transaction_qty * unit_price), 2)) as revenue
+from c_sales
+group by product_type
+order by sum(transaction_qty * unit_price) desc
+limit 5;
+
+
+# 8. Daily Revenue Trend (February 2023)
+
+select transaction_date, 
+concat('$ ', format(round(sum(transaction_qty * unit_price),2),2)) AS daily_revenue
+from c_sales
+where transaction_date like '2023-02-%%'
+group by transaction_date
+order by transaction_date;
+
+
+# 9. Top 10 transaction counts by hour for (time-based analysis).
+
+select concat(lpad(extract(hour from transaction_time),2, '0'),' th') as hour,
+count(*) as transaction_count
+from c_sales
+group by hour
+order by transaction_count desc
+limit 10;
+
+
+# 10. Top 3 Most Sold Product Category by Quantity.
+
+select product_category, sum(transaction_qty) as total_quantiy
+from c_sales
+group by product_category
+order by total_quantiy desc
+limit 3;
+
+
+# 11. Top 10 Product Type with highest grossing Average Unit Price.
+
+select product_type, 
+concat('$ ', format(round(avg(unit_price),2),2)) as avg_unit_price
+from c_sales
+group by product_type
+order by avg(unit_price) desc
+limit 10;
+
+
+# 12. Find the best-selling product in each store (by quantity).
+
+with best as (
+	select store_location, product_detail, sum(transaction_qty) as total_quantity,
+	dense_rank() over(partition by store_location order by sum(transaction_qty) desc) as rnk
+	from c_sales
+	group by store_location ,product_detail
+)
+select store_location, product_detail, total_quantity
+from best
+where rnk = 1
+order by total_quantity desc;
+
+
+# 13. Compare Weekday vs Weekend sales.
+
+select case
+    when dayofweek(transaction_date) in (1, 7) then 'Weekend'  -- 1 = Sunday, 7 = Saturday
+    else 'Weekday'
+  end as day_type,
+  concat('$ ', format(round(sum(transaction_qty * unit_price),2),2)) AS total_revenue
+from c_sales
+group by day_type
+order by total_revenue desc;
+
+
+# 14. Identify Slowest and Fastest-moving products (by quantity sold).
+
+# Fastest-moving product by quantity sold -
+
+select product_detail, sum(transaction_qty) as total_quantity
+from c_sales
+group by product_detail
+order by total_quantity desc
+limit 1;
+
+# Slowest-moving product by quantity sold -
+
+select product_detail, sum(transaction_qty) as total_quantity
+from c_sales
+group by product_detail
+order by total_quantity
+limit 1;
+
+
+# 16. Find revenue contribution % of each product category.
+
+select product_category,
+	   format(round(sum(transaction_qty * unit_price),2),2) as category_revenue,
+	   format(round(sum(transaction_qty * unit_price) /
+	   (select sum(transaction_qty * unit_price) from c_sales) * 100, 2),2) as revenue_percentage
+from c_sales
+group by product_category;
+
+
+# 17. Create a rank of stores based on monthly revenue using RANK() choosing a single month.
+
+with monthly_revenue as (
+  select store_location,
+         extract(month from transaction_date) as month_num,
+         concat('$ ', format(round(sum(transaction_qty * unit_price),2),2)) as monthly_revenue
+  from c_sales
+  group by store_location, month_num
+)
+select store_location, month_num, monthly_revenue,
+       rank() over (partition by month_num order by monthly_revenue desc) as revenue_rank
+from monthly_revenue
+where month_num = 6
+order by month_num, revenue_rank;
+
