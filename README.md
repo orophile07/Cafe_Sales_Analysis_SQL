@@ -88,7 +88,7 @@ To extract meaningful, actionable insights using SQL that address real-world bus
 If you enjoyed this project, feel free to:
 
 - ⭐ Star this repo  
-- 🤝 Connect with me on [LinkedIn](www.linkedin.com/in/soham-ghosh7704)  
-- 📂 Explore more of my [Data Projects on GitHub]([https://github.com/](https://github.com/orophile07))
+- 🤝 Connect with me on [LinkedIn](https://www.linkedin.com/in/soham-ghosh7704/)  
+- 📂 Explore more of my [Data Projects on GitHub](https://github.com/orophile07)
 
 ---
