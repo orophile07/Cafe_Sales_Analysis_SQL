@@ -89,6 +89,6 @@ If you enjoyed this project, feel free to:
 
 - ⭐ Star this repo  
 - 🤝 Connect with me on [LinkedIn](https://www.linkedin.com/in/soham-ghosh7704/)  
-- 📂 Explore more of my [Data Projects on GitHub](https://github.com/orophile07)
+- 📂 Explore more of my [GitHub](https://github.com/orophile07)
 
 ---
